@@ -19,6 +19,10 @@ class Transcriber:
         Your task is to transform the following text into valid LaTeX code.
         In math mode,  words refer to macros and symbols.
         For example, "alpha" should be converted to "\alpha".
+
+        Preferences:
+        - Consider that you are in text mode by default.
+        - Use the "amsmath" package.
         """
 
     def transcribe_audio(self, audio_file_path):
@@ -28,7 +32,9 @@ class Transcriber:
                 model="whisper-1",
                 file=audio_file
             )
-        return transcription.text
+        text = transcription.text
+        self.logger.info(f"Transcription: {text}")
+        return text
 
     def postprocess_transcription(self, transcription):
         self.logger.info("Sending transcription to OpenAI for postprocessing")
@@ -46,10 +52,11 @@ class Transcriber:
                 }
             ]
         )
+        self.logger.info(f"Postprocessed transcription: {response.choices[0].message.content}")
+        self.logger.info(f"Usage: {response.usage}")
         return response.choices[0].message.content
 
     def transcribe(self, audio_file_path):
         transcription = self.transcribe_audio(audio_file_path)
         final_transcription = self.postprocess_transcription(transcription)
-        self.logger.info(f"Final transcription: {final_transcription}")
         return final_transcription
