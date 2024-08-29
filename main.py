@@ -9,6 +9,6 @@ if __name__ == "__main__":
     transcriber = Transcriber()
     transcription = transcriber.transcribe(recorder.last_recording)
 
-    postprocessor = PostProcessor()
+    postprocessor = GPTPostProcessor()
     final_transcription = postprocessor.postprocess_transcription(transcription)
     print("Transcription:", transcription)

@@ -1,7 +1,12 @@
+import abc
 import logging
 from openai import OpenAI
 
-class PostProcessor:
+class PostProcessor(abc.ABC):
+    @abc.abstractmethod
+    def postprocess_transcription(self, transcription):
+        pass
+class GPTPostProcessor(PostProcessor):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
