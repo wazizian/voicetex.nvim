@@ -1,11 +1,15 @@
 import logging
 from openai import OpenAI
 
-# Set up basic logging configuration
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class Transcriber:
     def __init__(self):
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        self.logger.addHandler(handler)
+
         self.client = OpenAI()
 
         self.temperature = 0.
@@ -18,7 +22,7 @@ class Transcriber:
         """
 
     def transcribe_audio(self, audio_file_path):
-        logging.info(f"Transcribing audio file: {audio_file_path}")
+        self.logger.info(f"Transcribing audio file: {audio_file_path}")
         with open(audio_file_path, 'rb') as audio_file:
             transcription = self.client.audio.transcriptions.create(
                 model="whisper-1",
@@ -27,7 +31,7 @@ class Transcriber:
         return transcription.text
 
     def postprocess_transcription(self, transcription):
-        logging.info("Sending transcription to OpenAI for postprocessing")
+        self.logger.info("Sending transcription to OpenAI for postprocessing")
         response = self.client.chat.completions.create(
             model="gpt-4o",
             temperature=self.temperature,
