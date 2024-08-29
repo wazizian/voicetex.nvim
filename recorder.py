@@ -27,13 +27,13 @@ class Recorder:
         done = False
         while not done:
             self.recording = [] # Clear the current recording
-            self.logger.info("Recording... Press Enter to stop.")
+            print("Recording... Press Enter to stop.")
             with sd.InputStream(samplerate=self.samplerate, channels=self.channels, callback=self.callback):
                 input()  # Wait for the user to press Enter
             self.save_recording()
             self.last_recording = os.path.join(self.folder, self.filename)
             if os.path.getsize(self.last_recording) > self.size_limit:
-                self.logger.warning("Recording is too large. Please record again.")
+                print("Recording is too large. Please record again.")
             else:
                 done = True
 
@@ -68,4 +68,4 @@ class Recorder:
             sd.play(data, samplerate)
             sd.wait()
         else:
-            self.logger.warning("No recording available to play back.")
+            print("No recording available to play back.")
