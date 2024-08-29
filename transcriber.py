@@ -15,7 +15,10 @@ class Transcriber:
 
     def transcribe_audio(self, audio_file_path):
         with open(audio_file_path, 'rb') as audio_file:
-            transcription = self.client.audio.transcriptions.create("whisper-1", audio_file)
+            transcription = self.client.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio_file
+            )
         return transcription.text
 
     def postprocess_transcription(self, transcription):
