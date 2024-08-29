@@ -43,10 +43,10 @@ class GPTPostProcessor(PostProcessor):
         """
     
     def add_context(self, context):
-        fcontext = f"Follow closely the LaTeX code provided in the examples below.
+        fcontext = f"""Follow closely the LaTeX code provided in the examples below.
         <EXAMPLES>
         {context}
-        </EXAMPLES>"
+        </EXAMPLES>"""
         self.system_prompt += fcontext
 
     def postprocess_transcription(self, transcription):
