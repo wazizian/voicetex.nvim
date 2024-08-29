@@ -11,6 +11,10 @@ class Recorder:
         self.channels = channels
         self.recording = []
         self.last_recording = None
+        self.folder = "recordings"
+        self.filename = "output.mp3"
+        self.temp_filename = "temp.wav"
+        self.size_limit = 5 * 1024 * 1024  # 5MB
 
     def record(self):
         done = False
@@ -20,9 +24,9 @@ class Recorder:
             with sd.InputStream(samplerate=self.samplerate, channels=self.channels, callback=self.callback):
                 input()  # Wait for the user to press Enter
             self.save_recording()
-            self.last_recording = os.path.join("recordings", "output.mp3")
-            if os.path.getsize(self.last_recording) > 5 * 1024 * 1024:  # 5MB
-                print("Recording is larger than 5MB. Please record again.")
+            self.last_recording = os.path.join(self.folder, self.filename)
+            if os.path.getsize(self.last_recording) > self.size_limit:
+                print("Recording is too large. Please record again.")
             else:
                 done = True
 
@@ -31,11 +35,11 @@ class Recorder:
             print(status, file=sys.stderr)
         self.recording.append(indata.copy())
 
-    def save_recording(self, filename="output.mp3", folder="recordings"):
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        wav_file = os.path.join(folder, "temp.wav")
-        mp3_file = os.path.join(folder, filename)
+    def save_recording(self):
+        if not os.path.exists(self.folder):
+            os.makedirs(self.folder)
+        wav_file = os.path.join(self.folder, self.temp_filename)
+        mp3_file = os.path.join(self.folder, self.filename)
 
         # Save as WAV
         sf.write(wav_file, np.concatenate(self.recording), self.samplerate)
