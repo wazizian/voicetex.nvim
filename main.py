@@ -1,6 +1,6 @@
 from recorder import Recorder
 from transcriber import Transcriber
-from postprocessor import PostProcessor
+from postprocessor import GPTPostProcessor
 
 if __name__ == "__main__":
     recorder = Recorder()
