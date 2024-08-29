@@ -1,5 +1,6 @@
 from recorder import Recorder
 from transcriber import Transcriber
+from postprocessor import PostProcessor
 
 if __name__ == "__main__":
     recorder = Recorder()
@@ -7,4 +8,7 @@ if __name__ == "__main__":
 
     transcriber = Transcriber()
     transcription = transcriber.transcribe(recorder.last_recording)
+
+    postprocessor = PostProcessor()
+    final_transcription = postprocessor.postprocess_transcription(transcription)
     print("Transcription:", transcription)
