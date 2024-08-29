@@ -1,3 +1,4 @@
+import logging
 import sounddevice as sd
 import soundfile as sf
 import numpy as np
@@ -7,6 +8,12 @@ from pydub import AudioSegment
 
 class Recorder:
     def __init__(self, samplerate=44100, channels=2):
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        self.logger.addHandler(handler)
+
         self.samplerate = samplerate
         self.channels = channels
         self.recording = []
@@ -20,19 +27,19 @@ class Recorder:
         done = False
         while not done:
             self.recording = [] # Clear the current recording
-            print("Recording... Press Enter to stop.")
+            self.logger.info("Recording... Press Enter to stop.")
             with sd.InputStream(samplerate=self.samplerate, channels=self.channels, callback=self.callback):
                 input()  # Wait for the user to press Enter
             self.save_recording()
             self.last_recording = os.path.join(self.folder, self.filename)
             if os.path.getsize(self.last_recording) > self.size_limit:
-                print("Recording is too large. Please record again.")
+                self.logger.warning("Recording is too large. Please record again.")
             else:
                 done = True
 
     def callback(self, indata, frames, time, status):
         if status:
-            print(status, file=sys.stderr)
+            self.logger.error(status)
         self.recording.append(indata.copy())
 
     def save_recording(self):
@@ -51,14 +58,14 @@ class Recorder:
         # Clean up temporary WAV file
         os.remove(wav_file)
 
-        print(f"Recording saved as {mp3_file}")
+        self.logger.info(f"Recording saved as {mp3_file}")
         self.last_recording = mp3_file
 
     def playback(self):
         if self.last_recording:
-            print(f"Playing back {self.last_recording}")
+            self.logger.info(f"Playing back {self.last_recording}")
             data, samplerate = sf.read(self.last_recording)
             sd.play(data, samplerate)
             sd.wait()
         else:
-            print("No recording available to play back.")
+            self.logger.warning("No recording available to play back.")
