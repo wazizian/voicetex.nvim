@@ -13,12 +13,12 @@ class Transcriber:
         For example, "alpha" should be converted to "\alpha".
         """
 
-    def transcribe_audio(audio_file_path):
+    def transcribe_audio(self, audio_file_path):
         with open(audio_file_path, 'rb') as audio_file:
-            transcription = client.audio.transcriptions.create("whisper-1", audio_file)
+            transcription = self.client.audio.transcriptions.create("whisper-1", audio_file)
         return transcription.text
 
-    def postprocess_transcription(transcription):
+    def postprocess_transcription(self, transcription):
         response = self.client.chat.completions.create(
             model="gpt-4o",
             temperature=self.temperature,
