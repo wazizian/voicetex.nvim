@@ -40,4 +40,4 @@ class Transcriber:
 
     def transcribe(self, audio_file_path):
         transcription = self.transcribe_audio(audio_file_path)
-        return self.postprocess(transcription)
+        return self.postprocess_transcription(transcription)
