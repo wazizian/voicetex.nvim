@@ -13,11 +13,18 @@ class Recorder:
         self.last_recording = None
 
     def record(self):
-        print("Recording... Press Enter to stop.")
-        with sd.InputStream(samplerate=self.samplerate, channels=self.channels, callback=self.callback):
-            input()  # Wait for the user to press Enter
-        self.save_recording()
-        self.last_recording = os.path.join("recordings", "output.mp3")
+        done = False
+        while not done:
+            self.recording = [] # Clear the current recording
+            print("Recording... Press Enter to stop.")
+            with sd.InputStream(samplerate=self.samplerate, channels=self.channels, callback=self.callback):
+                input()  # Wait for the user to press Enter
+            self.save_recording()
+            self.last_recording = os.path.join("recordings", "output.mp3")
+            if os.path.getsize(self.last_recording) > 5 * 1024 * 1024:  # 5MB
+                print("Recording is larger than 5MB. Please record again.")
+            else:
+                done = True
 
     def callback(self, indata, frames, time, status):
         if status:
