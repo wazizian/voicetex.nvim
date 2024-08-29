@@ -36,7 +36,7 @@ class Transcriber:
                 }
             ]
         )
-        return completion.choices[0].message.content
+        return response.choices[0].message.content
 
     def transcribe(self, audio_file_path):
         transcription = self.transcribe_audio(audio_file_path)
