@@ -10,12 +10,14 @@ class Recorder:
         self.samplerate = samplerate
         self.channels = channels
         self.recording = []
+        self.last_recording = None
 
     def record(self):
         print("Recording... Press Enter to stop.")
         with sd.InputStream(samplerate=self.samplerate, channels=self.channels, callback=self.callback):
             input()  # Wait for the user to press Enter
         self.save_recording()
+        self.last_recording = os.path.join("recordings", "output.mp3")
 
     def callback(self, indata, frames, time, status):
         if status:
@@ -39,3 +41,13 @@ class Recorder:
         os.remove(wav_file)
 
         print(f"Recording saved as {mp3_file}")
+        self.last_recording = mp3_file
+
+    def playback(self):
+        if self.last_recording:
+            print(f"Playing back {self.last_recording}")
+            audio = AudioSegment.from_mp3(self.last_recording)
+            play_obj = audio.play()
+            play_obj.wait_done()
+        else:
+            print("No recording available to play back.")
