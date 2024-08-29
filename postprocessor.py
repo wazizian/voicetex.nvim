@@ -6,6 +6,19 @@ class PostProcessor(abc.ABC):
     @abc.abstractmethod
     def postprocess_transcription(self, transcription):
         pass
+
+    @abc.abstractmethod
+    def add_context(self, context):
+        pass
+
+    def add_context_from_files(self, *file_names):
+        context = ""
+        for file_name in file_names:
+            with open(file_name, "r") as file:
+                context += file.read()
+        self.add_context(context)
+        
+    
 class GPTPostProcessor(PostProcessor):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -26,7 +39,15 @@ class GPTPostProcessor(PostProcessor):
         Preferences:
         - Consider that you are in text mode by default.
         - Use the "amsmath" package.
+
         """
+    
+    def add_context(self, context):
+        fcontext = f"Follow closely the LaTeX code provided in the examples below.
+        <EXAMPLES>
+        {context}
+        </EXAMPLES>"
+        self.system_prompt += fcontext
 
     def postprocess_transcription(self, transcription):
         self.logger.info("Sending transcription to OpenAI for postprocessing")
