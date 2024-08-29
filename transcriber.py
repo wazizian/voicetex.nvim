@@ -50,4 +50,6 @@ class Transcriber:
 
     def transcribe(self, audio_file_path):
         transcription = self.transcribe_audio(audio_file_path)
-        return self.postprocess_transcription(transcription)
+        final_transcription = self.postprocess_transcription(transcription)
+        self.logger.info(f"Final transcription: {final_transcription}")
+        return final_transcription
