@@ -83,7 +83,7 @@ class ClaudePostProcessor(PostProcessor):
         self.model = claudette.models[1]
         self.logger.info(f"Using model: {self.model}")
 
-        self.system_prompt = """
+        self.system_prompt = r"""
         You are a helpful assistant for a mathematician.
         Your task is to transform the following text into valid LaTeX code.
         In math mode, words refer to macros and symbols.
