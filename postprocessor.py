@@ -39,6 +39,7 @@ class GPTPostProcessor(PostProcessor):
 
         Preferences:
         - Consider that you are in text mode by default.
+        - Assume that the output will be inserted in text mode between \begin{document} and \end{document}.
         - Use the "amsmath" package.
 
         """
@@ -105,7 +106,7 @@ class ClaudePostProcessor(PostProcessor):
     def postprocess_transcription(self, transcription):
         self.logger.info("Sending transcription to Claude for postprocessing")
         response = self.chat(transcription)
-        text = response.content[0]['text']
+        text = response.content[0].text
         self.logger.info(f"Postprocessed transcription: {text}")
         self.logger.info(f"Usage: {response.usage}")
         return text
