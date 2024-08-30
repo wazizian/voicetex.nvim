@@ -11,7 +11,7 @@ class PostProcessor(abc.ABC):
     def add_context(self, context):
         pass
 
-    def add_context_from_buffers(self, *buffers_names, *buffers):
+    def add_context_from_buffers(self, buffers_names, buffers):
         context = ""
         for buffer_name, buffer in zip(buffers_names, buffers):
             context += f"<BUFFER {buffer_name}>\n{buffer}\n</BUFFER>\n"
