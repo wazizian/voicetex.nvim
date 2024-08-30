@@ -1,7 +1,7 @@
 import argparse
 from recorder import Recorder
 from transcriber import Transcriber
-from postprocessor import ClaudePostProcessor
+from postprocessor import PostProcessor
 
 def main():
     parser = argparse.ArgumentParser(description="Record, transcribe, and postprocess audio.")
@@ -15,7 +15,7 @@ def main():
     transcriber = Transcriber()
     transcription = transcriber.transcribe(recorder.last_recording)
 
-    postprocessor = ClaudePostProcessor()
+    postprocessor = PostProcessor()
     if args.context:
         postprocessor.add_context_from_files(*args.context)
     final_transcription = postprocessor.postprocess_transcription(transcription)

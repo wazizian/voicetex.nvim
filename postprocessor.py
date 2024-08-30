@@ -1,30 +1,7 @@
-import abc
 import logging
 import claudette
 
-class PostProcessor(abc.ABC):
-    @abc.abstractmethod
-    def postprocess_transcription(self, transcription):
-        pass
-
-    @abc.abstractmethod
-    def add_context(self, context):
-        pass
-
-    def add_context_from_buffers(self, buffers_names, buffers):
-        context = ""
-        for buffer_name, buffer in zip(buffers_names, buffers):
-            context += f"<BUFFER {buffer_name}>\n{buffer}\n</BUFFER>\n"
-        self.add_context(context)
-
-    def add_context_from_files(self, *file_names):
-        context = ""
-        for file_name in file_names:
-            with open(file_name, "r") as file:
-                context += f"<FILE {file_name}>\n{file.read()}\n</FILE>\n"
-        self.add_context(context)
-
-class ClaudePostProcessor(PostProcessor):
+class PostProcessor:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
@@ -59,6 +36,19 @@ class ClaudePostProcessor(PostProcessor):
         {context}
         </EXAMPLES>"""
         msg = claudette.mk_msg(fcontext, cache=True)
+
+    def add_context_from_buffers(self, buffers_names, buffers):
+        context = ""
+        for buffer_name, buffer in zip(buffers_names, buffers):
+            context += f"<BUFFER {buffer_name}>\n{buffer}\n</BUFFER>\n"
+        self.add_context(context)
+
+    def add_context_from_files(self, *file_names):
+        context = ""
+        for file_name in file_names:
+            with open(file_name, "r") as file:
+                context += f"<FILE {file_name}>\n{file.read()}\n</FILE>\n"
+        self.add_context(context)
 
     def postprocess_transcription(self, transcription, local_context=None):
         self.logger.info("Sending transcription to Claude for postprocessing")
