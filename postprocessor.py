@@ -94,6 +94,8 @@ class ClaudePostProcessor(PostProcessor):
         - Do not include any preamble, \documentclass, \usepackage, or \begin{document}/\end{document} tags.
         - Output only the LaTeX code for the content itself.
         - Assume the amsmath package is available for use.
+        - When the word "equation" is mentioned, use the equation environment (\begin{equation} ... \end{equation}).
+        - For inline math, use $...$ delimiters.
 
         """
         self.chat = claudette.Chat(self.model, sp=self.system_prompt)
@@ -108,12 +110,7 @@ class ClaudePostProcessor(PostProcessor):
     def postprocess_transcription(self, transcription):
         self.logger.info("Sending transcription to Claude for postprocessing")
         response = self.chat(transcription)
-        text = response.content[0].text
-        # Remove any explanatory text or comments from the response
-        latex_code = text.strip()
-        if latex_code.startswith("Here's") and "\n\n" in latex_code:
-            latex_code = latex_code.split("\n\n", 1)[1]
-        latex_code = latex_code.strip()
+        latex_code = response.content[0].text.strip()
         
         self.logger.info(f"Postprocessed transcription: {latex_code}")
         self.logger.info(f"Usage: {response.usage}")
