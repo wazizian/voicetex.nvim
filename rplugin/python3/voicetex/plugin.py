@@ -1,6 +1,7 @@
 """Actual implement lies here."""
 import pynvim as neovim
 import pynvim.api
+import os
 from .recorder import Recorder
 from .transcriber import Transcriber
 from .postprocessor import PostProcessor
@@ -21,6 +22,23 @@ class VoiceTex:
         self.transcriber = Transcriber()
         self.postprocessor = PostProcessor()
         self.nvim.command("echom 'VoiceTex: Initialized!'")
+
+    @neovim.command("VoiceTexContext", nargs='*')
+    def add_context(self, args):
+        if not self.postprocessor:
+            self.nvim.command("echoerr 'VoiceTex: Plugin not initialized. Run VoiceTexInit first.'")
+            return
+
+        cwd = self.nvim.call('getcwd')
+        full_paths = [os.path.join(cwd, filename) for filename in args]
+        existing_files = [path for path in full_paths if os.path.isfile(path)]
+
+        if not existing_files:
+            self.nvim.command("echoerr 'VoiceTex: No valid files provided as context.'")
+            return
+
+        self.postprocessor.add_context_from_files(*existing_files)
+        self.nvim.command(f"echo 'VoiceTex: Added {len(existing_files)} file(s) as context.'")
 
     @neovim.command("ModuleHelloWorld")
     def hello_world(self) -> None:
