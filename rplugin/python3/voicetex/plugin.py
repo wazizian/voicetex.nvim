@@ -8,7 +8,16 @@ from .postprocessor import PostProcessor
 
 @neovim.plugin
 class VoiceTex:
+    """
+    Main plugin class for VoiceTex, handling voice-to-LaTeX functionality in Neovim.
+    """
+
     def __init__(self, nvim: pynvim.api.Nvim):
+        """
+        Initialize the VoiceTex plugin.
+
+        :param nvim: Neovim instance
+        """
         self.nvim = nvim
         self.local_context_length = 0
         self.recorder = None
@@ -18,6 +27,11 @@ class VoiceTex:
 
     @neovim.command("VoiceTexInit", nargs='?', default='<CR>')
     def init(self, args) -> None:
+        """
+        Initialize the VoiceTex plugin components.
+
+        :param args: Optional arguments, used to set the stop key
+        """
         self.local_context_length = 5
         self.recorder = Recorder()
         self.transcriber = Transcriber()
@@ -27,6 +41,11 @@ class VoiceTex:
 
     @neovim.command("VoiceTexContext", nargs='*')
     def add_context(self, args):
+        """
+        Add context files to the postprocessor.
+
+        :param args: List of file names to be added as context
+        """
         if not self.postprocessor:
             self.nvim.command("echoerr 'VoiceTex: Plugin not initialized. Run VoiceTexInit first.'")
             return
@@ -43,6 +62,11 @@ class VoiceTex:
         self.nvim.command(f"echo 'VoiceTex: Added {len(existing_files)} file(s) as context.'")
 
     def get_local_context(self):
+        """
+        Get the local context around the cursor.
+
+        :return: Tuple of (text before cursor, text after cursor)
+        """
         buffer = self.nvim.current.buffer
         row, col = self.nvim.current.window.cursor
         
@@ -61,6 +85,9 @@ class VoiceTex:
 
     @neovim.command("VoiceTexRecord")
     def record_audio(self):
+        """
+        Record audio, transcribe it, postprocess into LaTeX, and insert at cursor position.
+        """
         if not all([self.recorder, self.transcriber, self.postprocessor, self.stop_key]):
             self.nvim.command("echoerr 'VoiceTex: Plugin not initialized. Run VoiceTexInit first.'")
             return
@@ -87,4 +114,7 @@ class VoiceTex:
 
     @neovim.command("ModuleHelloWorld")
     def hello_world(self) -> None:
+        """
+        A simple hello world command for testing purposes.
+        """
         self.nvim.command("echom 'MyPlugin: Hello World!'")
