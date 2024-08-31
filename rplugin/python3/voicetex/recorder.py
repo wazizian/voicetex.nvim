@@ -22,20 +22,20 @@ class Recorder:
         self.temp_filename = "temp.wav"
         self.size_limit = 5 * 1024 * 1024  # 5MB
 
-    def record(self, nvim):
+    def record(self, nvim, stop_key):
         if nvim is None:
             raise ValueError("Recorder must be called from within Neovim")
 
         self.recording = []  # Clear the current recording
         with sd.InputStream(samplerate=self.samplerate, channels=self.channels, callback=self.callback):
-            nvim.command('echo "Recording... Press Enter to stop."')
+            nvim.command(f'echo "Recording... Press {stop_key} to stop."')
             nvim.command('let g:voicetex_recording_done = 0')
-            nvim.command('nnoremap <CR> :let g:voicetex_recording_done = 1<CR>')
+            nvim.command(f'nnoremap <silent> {stop_key} :let g:voicetex_recording_done = 1<CR>')
             while True:
                 nvim.command('redraw')
                 if nvim.eval('g:voicetex_recording_done'):
                     break
-            nvim.command('nunmap <CR>')
+            nvim.command(f'nunmap {stop_key}')
 
         self.save_recording()
         self.last_recording = os.path.join(self.folder, self.filename)

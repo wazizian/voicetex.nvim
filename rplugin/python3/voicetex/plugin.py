@@ -14,14 +14,16 @@ class VoiceTex:
         self.recorder = None
         self.transcriber = None
         self.postprocessor = None
+        self.stop_key = None
 
-    @neovim.command("VoiceTexInit")
-    def init(self) -> None:
+    @neovim.command("VoiceTexInit", nargs='?', default='<C-c>')
+    def init(self, args) -> None:
         self.local_context_length = 5
         self.recorder = Recorder()
         self.transcriber = Transcriber()
         self.postprocessor = PostProcessor()
-        self.nvim.command("echom 'VoiceTex: Initialized!'")
+        self.stop_key = args[0] if args else '<C-c>'
+        self.nvim.command(f"echom 'VoiceTex: Initialized! Stop key set to {self.stop_key}'")
 
     @neovim.command("VoiceTexContext", nargs='*')
     def add_context(self, args):
@@ -42,12 +44,12 @@ class VoiceTex:
 
     @neovim.command("VoiceTexRecord")
     def record_audio(self):
-        if not self.recorder:
+        if not self.recorder or not self.stop_key:
             self.nvim.command("echoerr 'VoiceTex: Plugin not initialized. Run VoiceTexInit first.'")
             return
 
-        self.nvim.command("echo 'Recording... Press Enter to stop.'")
-        self.recorder.record(self.nvim)
+        self.nvim.command("echo 'Recording... Press " + self.stop_key + " to stop.'")
+        self.recorder.record(self.nvim, self.stop_key)
         self.nvim.command("echo 'Recording stopped.'")
 
     @neovim.command("ModuleHelloWorld")
