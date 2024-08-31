@@ -3,7 +3,6 @@ import sounddevice as sd
 import soundfile as sf
 import numpy as np
 import os
-import sys
 from pydub import AudioSegment
 
 class Recorder:
@@ -23,27 +22,25 @@ class Recorder:
         self.temp_filename = "temp.wav"
         self.size_limit = 5 * 1024 * 1024  # 5MB
 
-    def record(self, nvim=None):
+    def record(self, nvim):
+        if nvim is None:
+            raise ValueError("Recorder must be called from within Neovim")
+
         self.recording = []  # Clear the current recording
         with sd.InputStream(samplerate=self.samplerate, channels=self.channels, callback=self.callback):
-            if nvim:
-                nvim.command('echo "Recording... Press Enter to stop."')
-                nvim.command('let g:voicetex_recording_done = 0')
-                nvim.command('nnoremap <CR> :let g:voicetex_recording_done = 1<CR>')
-                while True:
-                    nvim.command('redraw')
-                    if nvim.eval('g:voicetex_recording_done'):
-                        break
-                nvim.command('nunmap <CR>')
-            else:
-                input()  # Wait for the user to press Enter
+            nvim.command('echo "Recording... Press Enter to stop."')
+            nvim.command('let g:voicetex_recording_done = 0')
+            nvim.command('nnoremap <CR> :let g:voicetex_recording_done = 1<CR>')
+            while True:
+                nvim.command('redraw')
+                if nvim.eval('g:voicetex_recording_done'):
+                    break
+            nvim.command('nunmap <CR>')
+
         self.save_recording()
         self.last_recording = os.path.join(self.folder, self.filename)
         if os.path.getsize(self.last_recording) > self.size_limit:
-            if nvim:
-                nvim.command("echo 'Recording is too large. Please record again.'")
-            else:
-                print("Recording is too large. Please record again.")
+            nvim.command("echo 'Recording is too large. Please record again.'")
             return False
         return True
 
@@ -71,11 +68,11 @@ class Recorder:
         self.logger.info(f"Recording saved as {mp3_file}")
         self.last_recording = mp3_file
 
-    def playback(self):
+    def playback(self, nvim):
         if self.last_recording:
             self.logger.info(f"Playing back {self.last_recording}")
             data, samplerate = sf.read(self.last_recording)
             sd.play(data, samplerate)
             sd.wait()
         else:
-            print("No recording available to play back.")
+            nvim.command("echo 'No recording available to play back.'")
