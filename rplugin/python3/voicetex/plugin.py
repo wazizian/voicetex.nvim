@@ -16,13 +16,13 @@ class VoiceTex:
         self.postprocessor = None
         self.stop_key = None
 
-    @neovim.command("VoiceTexInit", nargs='?', default='<C-c>')
+    @neovim.command("VoiceTexInit", nargs='?', default='<CR>')
     def init(self, args) -> None:
         self.local_context_length = 5
         self.recorder = Recorder()
         self.transcriber = Transcriber()
         self.postprocessor = PostProcessor()
-        self.stop_key = args[0] if args else '<C-c>'
+        self.stop_key = args[0] if args else '<CR>'
         self.nvim.command(f"echom 'VoiceTex: Initialized! Stop key set to {self.stop_key}'")
 
     @neovim.command("VoiceTexContext", nargs='*')
