@@ -25,8 +25,8 @@ class VoiceTex:
         self.postprocessor = None
         self.stop_key = None
 
-    @neovim.command("VoiceTexInit", nargs='?', default='<CR>')
-    def init(self, args) -> None:
+    @neovim.command("VoiceTexInit", nargs='?')
+    def init(self, args=None) -> None:
         """
         Initialize the VoiceTex plugin components.
 
