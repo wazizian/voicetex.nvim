@@ -1,4 +1,3 @@
-"""Actual implement lies here."""
 import pynvim as neovim
 import pynvim.api
 import os
@@ -11,6 +10,7 @@ from .postprocessor import PostProcessor
 class VoiceTex:
     def __init__(self, nvim: pynvim.api.Nvim):
         self.nvim = nvim
+        self.local_context_length = 0
         self.recorder = None
         self.transcriber = None
         self.postprocessor = None
@@ -34,7 +34,7 @@ class VoiceTex:
         existing_files = [path for path in full_paths if os.path.isfile(path)]
 
         if not existing_files:
-            self.nvim.command("echoerr 'VoiceTex: No valid files provided as context.'")
+            self.nvim.command("echo 'VoiceTex: No valid files provided as context.'")
             return
 
         self.postprocessor.add_context_from_files(*existing_files)
