@@ -42,15 +42,48 @@ class VoiceTex:
         self.postprocessor.add_context_from_files(*existing_files)
         self.nvim.command(f"echo 'VoiceTex: Added {len(existing_files)} file(s) as context.'")
 
+    def get_local_context(self):
+        buffer = self.nvim.current.buffer
+        row, col = self.nvim.current.window.cursor
+        
+        start_row = max(0, row - self.local_context_length - 1)
+        end_row = min(len(buffer), row + self.local_context_length)
+        
+        before_context = buffer[start_row:row-1]
+        current_line_before = buffer[row-1][:col]
+        current_line_after = buffer[row-1][col:]
+        after_context = buffer[row:end_row]
+        
+        before = "\n".join(before_context + [current_line_before])
+        after = "\n".join([current_line_after] + after_context)
+        
+        return (before, after)
+
     @neovim.command("VoiceTexRecord")
     def record_audio(self):
-        if not self.recorder or not self.stop_key:
+        if not all([self.recorder, self.transcriber, self.postprocessor, self.stop_key]):
             self.nvim.command("echoerr 'VoiceTex: Plugin not initialized. Run VoiceTexInit first.'")
             return
 
         self.nvim.command("echo 'Recording... Press " + self.stop_key + " to stop.'")
-        self.recorder.record(self.nvim, self.stop_key)
-        self.nvim.command("echo 'Recording stopped.'")
+        if self.recorder.record(self.nvim, self.stop_key):
+            self.nvim.command("echo 'Recording stopped. Transcribing...'")
+            
+            # Transcribe the audio
+            transcription = self.transcriber.transcribe(self.recorder.last_recording)
+            
+            # Get local context
+            local_context = self.get_local_context()
+            
+            # Postprocess the transcription
+            self.nvim.command("echo 'Postprocessing transcription...'")
+            latex_code = self.postprocessor.postprocess_transcription(transcription, local_context)
+            
+            # Insert the LaTeX code at the cursor position
+            self.nvim.command("normal! a" + latex_code)
+            self.nvim.command("echo 'LaTeX code inserted.'")
+        else:
+            self.nvim.command("echo 'Recording failed or was too large.'")
 
     @neovim.command("ModuleHelloWorld")
     def hello_world(self) -> None:
