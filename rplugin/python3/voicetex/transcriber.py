@@ -18,7 +18,8 @@ class Transcriber:
         with open(audio_file_path, 'rb') as audio_file:
             transcription = self.client.audio.transcriptions.create(
                 model="whisper-1",
-                file=audio_file
+                file=audio_file,
+                language="en"
             )
         text = transcription.text
         self.logger.info(f"Transcription: {text}")
