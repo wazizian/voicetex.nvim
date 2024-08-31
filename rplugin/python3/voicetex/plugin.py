@@ -40,6 +40,16 @@ class VoiceTex:
         self.postprocessor.add_context_from_files(*existing_files)
         self.nvim.command(f"echo 'VoiceTex: Added {len(existing_files)} file(s) as context.'")
 
+    @neovim.command("VoiceTexRecord")
+    def record_audio(self):
+        if not self.recorder:
+            self.nvim.command("echoerr 'VoiceTex: Plugin not initialized. Run VoiceTexInit first.'")
+            return
+
+        self.nvim.command("echo 'Recording... Press Enter to stop.'")
+        self.recorder.record(self.nvim)
+        self.nvim.command("echo 'Recording stopped.'")
+
     @neovim.command("ModuleHelloWorld")
     def hello_world(self) -> None:
         self.nvim.command("echom 'MyPlugin: Hello World!'")

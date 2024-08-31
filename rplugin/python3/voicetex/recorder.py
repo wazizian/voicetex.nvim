@@ -23,19 +23,29 @@ class Recorder:
         self.temp_filename = "temp.wav"
         self.size_limit = 5 * 1024 * 1024  # 5MB
 
-    def record(self):
-        done = False
-        while not done:
-            self.recording = [] # Clear the current recording
-            print("Recording... Press Enter to stop.")
-            with sd.InputStream(samplerate=self.samplerate, channels=self.channels, callback=self.callback):
-                input()  # Wait for the user to press Enter
-            self.save_recording()
-            self.last_recording = os.path.join(self.folder, self.filename)
-            if os.path.getsize(self.last_recording) > self.size_limit:
-                print("Recording is too large. Please record again.")
+    def record(self, nvim=None):
+        self.recording = []  # Clear the current recording
+        with sd.InputStream(samplerate=self.samplerate, channels=self.channels, callback=self.callback):
+            if nvim:
+                nvim.command('echo "Recording... Press Enter to stop."')
+                nvim.command('let g:voicetex_recording_done = 0')
+                nvim.command('nnoremap <CR> :let g:voicetex_recording_done = 1<CR>')
+                while True:
+                    nvim.command('redraw')
+                    if nvim.eval('g:voicetex_recording_done'):
+                        break
+                nvim.command('nunmap <CR>')
             else:
-                done = True
+                input()  # Wait for the user to press Enter
+        self.save_recording()
+        self.last_recording = os.path.join(self.folder, self.filename)
+        if os.path.getsize(self.last_recording) > self.size_limit:
+            if nvim:
+                nvim.command("echo 'Recording is too large. Please record again.'")
+            else:
+                print("Recording is too large. Please record again.")
+            return False
+        return True
 
     def callback(self, indata, frames, time, status):
         if status:
