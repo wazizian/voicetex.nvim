@@ -37,6 +37,19 @@ class VoiceTex:
         self.transcriber = Transcriber()
         self.postprocessor = PostProcessor()
         self.stop_key = args[0] if args else '<CR>'
+
+        # Fetch API keys from Lua's environment variables
+        openai_api_key = self.nvim.exec_lua('return os.getenv("OPENAI_API_KEY")')
+        anthropic_api_key = self.nvim.exec_lua('return os.getenv("ANTHROPIC_API_KEY")')
+
+        if not openai_api_key or not anthropic_api_key:
+            self.nvim.command("echoerr 'VoiceTex: API keys not found in environment. Please ensure OPENAI_API_KEY and ANTHROPIC_API_KEY are set.'")
+            return
+
+        # Set environment variables for the Python process
+        os.environ['OPENAI_API_KEY'] = openai_api_key
+        os.environ['ANTHROPIC_API_KEY'] = anthropic_api_key
+
         self.nvim.command(f"echom 'VoiceTex: Initialized! Stop key set to {self.stop_key}'")
 
     @neovim.command("VoiceTexContext", nargs='*')
