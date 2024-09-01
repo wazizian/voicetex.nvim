@@ -25,10 +25,10 @@ class VoiceTex:
         self.postprocessor = None
         self.stop_key = None
 
-    @neovim.command("VoiceTexInit", nargs='?')
-    def init(self, args=None) -> None:
+    @neovim.command("VoiceTexSetup", nargs='?')
+    def setup(self, args=None):
         """
-        Initialize the VoiceTex plugin components.
+        Set up the VoiceTex plugin components.
 
         :param args: Optional arguments, used to set the stop key
         """
@@ -36,7 +36,7 @@ class VoiceTex:
         self.recorder = Recorder()
         self.transcriber = Transcriber()
         self.postprocessor = PostProcessor()
-        self.stop_key = args[0] if args else '<CR>'
+        self.stop_key = args[0] if args and len(args) > 0 else '<CR>'
 
         # Fetch API keys from Lua's environment variables
         openai_api_key = self.nvim.exec_lua('return os.getenv("OPENAI_API_KEY")')
@@ -50,7 +50,7 @@ class VoiceTex:
         os.environ['OPENAI_API_KEY'] = openai_api_key
         os.environ['ANTHROPIC_API_KEY'] = anthropic_api_key
 
-        self.nvim.command(f"echom 'VoiceTex: Initialized! Stop key set to {self.stop_key}'")
+        self.nvim.command(f"echom 'VoiceTex: Set up! Stop key set to {self.stop_key}'")
 
     @neovim.command("VoiceTexContext", nargs='*')
     def add_context(self, args):
@@ -102,7 +102,7 @@ class VoiceTex:
         Record audio, transcribe it, postprocess into LaTeX, and insert at cursor position.
         """
         if not all([self.recorder, self.transcriber, self.postprocessor, self.stop_key]):
-            self.nvim.command("echoerr 'VoiceTex: Plugin not initialized. Run VoiceTexInit first.'")
+            self.nvim.command("echoerr 'VoiceTex: Plugin not set up. Run VoiceTexSetup first.'")
             return
 
         self.nvim.command("echo 'Recording... Press " + self.stop_key + " to stop.'")
