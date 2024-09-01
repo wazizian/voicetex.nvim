@@ -4,6 +4,7 @@ import soundfile as sf
 import numpy as np
 import os
 from pydub import AudioSegment
+import tempfile
 
 class Recorder:
     def __init__(self, samplerate=44100, channels=2):
@@ -17,9 +18,6 @@ class Recorder:
         self.channels = channels
         self.recording = []
         self.last_recording = None
-        self.folder = "recordings"
-        self.filename = "output.mp3"
-        self.temp_filename = "temp.wav"
         self.size_limit = 5 * 1024 * 1024  # 5MB
 
     def record(self, nvim, stop_key):
@@ -38,9 +36,10 @@ class Recorder:
             nvim.command(f'nunmap {stop_key}')
 
         self.save_recording()
-        self.last_recording = os.path.join(self.folder, self.filename)
         if os.path.getsize(self.last_recording) > self.size_limit:
             nvim.command("echo 'Recording is too large. Please record again.'")
+            os.remove(self.last_recording)
+            self.last_recording = None
             return False
         return True
 
@@ -50,17 +49,16 @@ class Recorder:
         self.recording.append(indata.copy())
 
     def save_recording(self):
-        if not os.path.exists(self.folder):
-            os.makedirs(self.folder)
-        wav_file = os.path.join(self.folder, self.temp_filename)
-        mp3_file = os.path.join(self.folder, self.filename)
+        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_wav:
+            wav_file = temp_wav.name
+            # Save as WAV
+            sf.write(wav_file, np.concatenate(self.recording), self.samplerate)
 
-        # Save as WAV
-        sf.write(wav_file, np.concatenate(self.recording), self.samplerate)
-
-        # Convert to MP3
-        audio = AudioSegment.from_wav(wav_file)
-        audio.export(mp3_file, format="mp3")
+        with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as temp_mp3:
+            mp3_file = temp_mp3.name
+            # Convert to MP3
+            audio = AudioSegment.from_wav(wav_file)
+            audio.export(mp3_file, format="mp3")
 
         # Clean up temporary WAV file
         os.remove(wav_file)
@@ -76,3 +74,9 @@ class Recorder:
             sd.wait()
         else:
             nvim.command("echo 'No recording available to play back.'")
+
+    def cleanup(self):
+        if self.last_recording and os.path.exists(self.last_recording):
+            os.remove(self.last_recording)
+            self.last_recording = None
+            self.logger.info("Temporary recording file cleaned up")
