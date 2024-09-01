@@ -2,6 +2,8 @@
 
 VoiceTex is a Neovim plugin that enables voice-to-LaTeX functionality, allowing users to dictate mathematical content directly into their documents. It provides a seamless integration of speech recognition and LaTeX formatting within the Neovim environment.
 
+On a more personal note: I wrote this when I injured my dominant arm and I could not write with it anymore. This plugin was  written with [aider](https://github.com/paul-gauthier/aider) which was of great help given my situation.
+
 ## Features
 
 - Audio recording and transcription
@@ -41,7 +43,7 @@ Add the following to your Neovim configuration:
 
 ```lua
 use {
-  'path/to/voicetex',
+  'wazizian/voicetex.nvim',
   run = ':UpdateRemotePlugins',
   config = function()
     require('voicetex').setup()
@@ -49,7 +51,6 @@ use {
 }
 ```
 
-Replace `'path/to/voicetex'` with the actual path or GitHub repository URL of the VoiceTex plugin.
 
 ## Configuration
 
@@ -68,13 +69,32 @@ require('voicetex').setup({
    :VoiceTexRecord
    ```
    Dictate your LaTeX content and press the configured stop key (default: Enter) to finish.
+    
+   The plugin will transcribe your audio, convert it to LaTeX, and insert it at the cursor position, taking into account the local document context.
 
-2. Add context files to improve LaTeX conversion accuracy:
+2. Optionally, add context files to improve LaTeX conversion accuracy:
    ```
    :VoiceTexContext file1.tex file2.tex
    ```
    This command uses Anthropic's prompt caching to reduce API costs.
 
-3. The plugin will transcribe your audio, convert it to LaTeX, and insert it at the cursor position, taking into account the local document context.
-
 VoiceTex is designed for professional use in academic and scientific writing, offering a powerful tool for hands-free LaTeX document creation. It uses OpenAI's Whisper model for audio transcription and Anthropic's Claude model for LaTeX conversion, while leveraging local context to improve LaTeX formatting accuracy.
+
+## Development
+
+Clone this repo.
+
+Following `pynvim` recommendations, create `dummy_vimrc` at root containing
+```
+let &runtimepath.=','.escape(expand('<sfile>:p:h'), '\,')
+```
+Now launch `neovim` with
+```
+nvim -u ./dummy_vimrc
+```
+and run 
+```
+:UpdateRemotePlugins
+:lua require("voicetex").setup()
+```
+This `neovim` instance will then be using the local version of this plugin.
