@@ -109,21 +109,26 @@ class VoiceTex:
         if self.recorder.record(self.nvim, self.stop_key):
             self.nvim.command("echo 'Recording stopped. Transcribing...'")
             
-            # Transcribe the audio
-            transcription = self.transcriber.transcribe(self.recorder.last_recording)
-            
-            # Get local context
-            local_context = self.get_local_context()
-            
-            # Postprocess the transcription
-            self.nvim.command("echo 'Postprocessing transcription...'")
-            latex_code = self.postprocessor.postprocess_transcription(transcription, local_context)
-            
-            # Insert the LaTeX code at the cursor position
-            self.nvim.command("normal! a" + latex_code)
-            self.nvim.command("echo 'LaTeX code inserted.'")
+            try:
+                # Transcribe the audio
+                transcription = self.transcriber.transcribe(self.recorder.last_recording)
+                
+                # Get local context
+                local_context = self.get_local_context()
+                
+                # Postprocess the transcription
+                self.nvim.command("echo 'Postprocessing transcription...'")
+                latex_code = self.postprocessor.postprocess_transcription(transcription, local_context)
+                
+                # Insert the LaTeX code at the cursor position
+                self.nvim.command("normal! a" + latex_code)
+                self.nvim.command("echo 'LaTeX code inserted.'")
+            finally:
+                # Clean up the temporary recording file
+                self.recorder.cleanup()
         else:
             self.nvim.command("echo 'Recording failed or was too large.'")
+            self.recorder.cleanup()
 
     @neovim.command("ModuleHelloWorld")
     def hello_world(self) -> None:
