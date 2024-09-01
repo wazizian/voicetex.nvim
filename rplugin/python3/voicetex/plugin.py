@@ -129,10 +129,3 @@ class VoiceTex:
         else:
             self.nvim.command("echo 'Recording failed or was too large.'")
             self.recorder.cleanup()
-
-    @neovim.command("ModuleHelloWorld")
-    def hello_world(self) -> None:
-        """
-        A simple hello world command for testing purposes.
-        """
-        self.nvim.command("echom 'MyPlugin: Hello World!'")
