@@ -77,10 +77,4 @@ require('voicetex').setup({
 
 3. The plugin will transcribe your audio, convert it to LaTeX, and insert it at the cursor position, taking into account the local document context.
 
-## Technical Details
-
-- Audio Transcription: OpenAI's Whisper model
-- LaTeX Conversion: Anthropic's Claude model
-- Local context is used to improve LaTeX formatting accuracy
-
-VoiceTex is designed for professional use in academic and scientific writing, offering a powerful tool for hands-free LaTeX document creation.
+VoiceTex is designed for professional use in academic and scientific writing, offering a powerful tool for hands-free LaTeX document creation. It uses OpenAI's Whisper model for audio transcription and Anthropic's Claude model for LaTeX conversion, while leveraging local context to improve LaTeX formatting accuracy.
