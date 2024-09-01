@@ -26,7 +26,9 @@ class PostProcessor:
         - When the word "equation" is mentioned, use the equation environment (\begin{equation} ... \end{equation}).
         - When the word "align" is mentioned, use the equation environment (\begin{align} ... \end{align}).
         - For inline math, use $...$ delimiters.
-
+        - Do not say "Here's the LaTeX code for the given text:" or similar.
+        - Do not say "Note that this text doesn't require any special LaTeX formatting, as it's just plain text. It will be inserted into the context you provided as is.
+"
         """
         self.chat = claudette.Chat(self.model, sp=self.system_prompt)
     
