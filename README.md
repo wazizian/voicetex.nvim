@@ -28,6 +28,20 @@ Install the required Python packages:
 pip install pynvim openai sounddevice soundfile numpy pydub claudette
 ```
 
+After installing pynvim, make sure to set up Python for Neovim before installing VoiceTex. Add one of the following to your Neovim configuration:
+
+For Vim script:
+```vim
+let g:python3_host_prog = '/path/to/python3'
+```
+
+For Lua:
+```lua
+vim.g.python3_host_prog = '/path/to/python3'
+```
+
+Replace '/path/to/python3' with the actual path to your Python 3 executable.
+
 ### API Keys
 
 Set up your API keys as global environment variables:
@@ -51,6 +65,7 @@ use {
 }
 ```
 
+After installation, restart Neovim for the changes to take effect.
 
 ## Configuration
 
@@ -79,6 +94,10 @@ require('voicetex').setup({
    This command uses Anthropic's prompt caching to reduce API costs.
 
 VoiceTex is designed for professional use in academic and scientific writing, offering a powerful tool for hands-free LaTeX document creation. It uses OpenAI's Whisper model for audio transcription and Anthropic's Claude model for LaTeX conversion, while leveraging local context to improve LaTeX formatting accuracy.
+
+## TODO
+
+- Implement lazy loading to improve startup time and resource usage
 
 ## Development
 
