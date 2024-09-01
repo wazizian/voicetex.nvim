@@ -25,12 +25,12 @@ class VoiceTex:
         self.postprocessor = None
         self.stop_key = None
 
-    @neovim.command("VoiceTexSetup", nargs='?')
-    def setup(self, args=None):
+    @neovim.function("VoiceTexSetup", sync=True)
+    def setup(self, args):
         """
         Set up the VoiceTex plugin components.
 
-        :param args: Optional arguments, used to set the stop key
+        :param args: List containing optional arguments, used to set the stop key
         """
         self.local_context_length = 5
         self.recorder = Recorder()
@@ -38,19 +38,20 @@ class VoiceTex:
         self.postprocessor = PostProcessor()
         self.stop_key = args[0] if args and len(args) > 0 else '<CR>'
 
-        # Fetch API keys from Lua's environment variables
-        openai_api_key = self.nvim.exec_lua('return os.getenv("OPENAI_API_KEY")')
-        anthropic_api_key = self.nvim.exec_lua('return os.getenv("ANTHROPIC_API_KEY")')
+        # Fetch API keys from environment variables
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
 
         if not openai_api_key or not anthropic_api_key:
-            self.nvim.command("echoerr 'VoiceTex: API keys not found in environment. Please ensure OPENAI_API_KEY and ANTHROPIC_API_KEY are set.'")
-            return
+            self.nvim.err_write('VoiceTex: API keys not found in environment. Please ensure OPENAI_API_KEY and ANTHROPIC_API_KEY are set.\n')
+            return "Setup failed: API keys not found"
 
         # Set environment variables for the Python process
         os.environ['OPENAI_API_KEY'] = openai_api_key
         os.environ['ANTHROPIC_API_KEY'] = anthropic_api_key
 
-        self.nvim.command(f"echom 'VoiceTex: Set up! Stop key set to {self.stop_key}'")
+        self.nvim.out_write(f'VoiceTex: Set up! Stop key set to {self.stop_key}\n')
+        return "Setup complete"
 
     @neovim.command("VoiceTexContext", nargs='*')
     def add_context(self, args):
