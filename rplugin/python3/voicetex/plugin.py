@@ -28,15 +28,21 @@ class VoiceTex:
     @neovim.function("VoiceTexSetup", sync=True)
     def setup(self, args):
         """
-        Set up the VoiceTex plugin components.
+        Set up the VoiceTex settings.
 
         :param args: List containing optional arguments, used to set the stop key
         """
         self.local_context_length = 5
+        self.stop_key = args[0] if args and len(args) > 0 else '<CR>'
+        return "Setup complete"
+
+    def full_setup(self):
+        """
+        Set up the VoiceTex plugin components.
+        """
         self.recorder = Recorder()
         self.transcriber = Transcriber()
         self.postprocessor = PostProcessor()
-        self.stop_key = args[0] if args and len(args) > 0 else '<CR>'
 
         # Fetch API keys from environment variables
         openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -44,14 +50,15 @@ class VoiceTex:
 
         if not openai_api_key or not anthropic_api_key:
             self.nvim.err_write('VoiceTex: API keys not found in environment. Please ensure OPENAI_API_KEY and ANTHROPIC_API_KEY are set.\n')
-            return "Setup failed: API keys not found"
+            exit(1)
 
         # Set environment variables for the Python process
         os.environ['OPENAI_API_KEY'] = openai_api_key
         os.environ['ANTHROPIC_API_KEY'] = anthropic_api_key
 
         self.nvim.out_write(f'VoiceTex: Set up! Stop key set to {self.stop_key}\n')
-        return "Setup complete"
+        return
+
 
     @neovim.command("VoiceTexContext", nargs='*')
     def add_context(self, args):
@@ -61,8 +68,7 @@ class VoiceTex:
         :param args: List of file names to be added as context
         """
         if not self.postprocessor:
-            self.nvim.command("echoerr 'VoiceTex: Plugin not initialized. Run VoiceTexInit first.'")
-            return
+            self.full_setup()
 
         cwd = self.nvim.call('getcwd')
         full_paths = [os.path.join(cwd, filename) for filename in args]
@@ -102,9 +108,8 @@ class VoiceTex:
         """
         Record audio, transcribe it, postprocess into LaTeX, and insert at cursor position.
         """
-        if not all([self.recorder, self.transcriber, self.postprocessor, self.stop_key]):
-            self.nvim.command("echoerr 'VoiceTex: Plugin not set up. Run VoiceTexSetup first.'")
-            return
+        if not all([self.recorder, self.transcriber, self.postprocessor]):
+            self.full_setup()
 
         self.nvim.command("echo 'Recording... Press " + self.stop_key + " to stop.'")
         if self.recorder.record(self.nvim, self.stop_key):
